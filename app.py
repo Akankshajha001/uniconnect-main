@@ -6,7 +6,7 @@ Author: Gaurav Pathak
 Description: Campus utility platform using in-memory Python data structures
 """
 
-import streamlit as st
+
 from database.users_db import signup_user, login_user, get_user_by_id
 from ui.dashboard_ui import render_dashboard
 from ui.lost_found_ui import render_lost_found
