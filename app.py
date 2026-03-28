@@ -133,7 +133,7 @@ def render_sidebar():
                 st.session_state.page = 'notes'
                 st.rerun()
         
-       
+        st.markdown("<br>", unsafe_allow_html=True)
         
         # Full width navigation buttons
         if st.button("🏠 Dashboard", use_container_width=True, 
