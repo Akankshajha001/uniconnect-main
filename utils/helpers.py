@@ -39,9 +39,7 @@ def get_relative_date(date_obj: datetime) -> str:
         return "Yesterday"
     elif days < 7:
         return f"{days} days ago"
-    elif days < 30:
-        weeks = days // 7
-        return f"{weeks} week{'s' if weeks > 1 else ''} ago"
+    
     else:
         months = days // 30
         return f"{months} month{'s' if months > 1 else ''} ago"
