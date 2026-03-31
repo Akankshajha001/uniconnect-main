@@ -3,12 +3,13 @@ Notes Exchange Service - Business logic for notes sharing
 """
 
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict
 from database import notes_db
+
 
 def upload_note(subject: str, topic: str, semester: str, uploaded_by: str,
                 file_name: str, description: str, file_path: str = "") -> Dict:
-    """Upload a new note to the database (SQLite)"""
+    """Upload a new note to the database"""
     note = {
         'subject': subject,
         'topic': topic,
@@ -25,30 +26,31 @@ def upload_note(subject: str, topic: str, semester: str, uploaded_by: str,
     note['rating'] = 0.0
     return note
 
+
 def get_notes_by_subject(subject: str) -> List[Dict]:
-    """Get all notes for a specific subject from SQLite DB"""
+    """Get all notes for a specific subject"""
     return notes_db.get_notes_by_subject(subject)
 
+
 def get_all_notes_list() -> List[Dict]:
-    """Get all notes as a flat list from SQLite DB"""
+    """Get all notes as a flat list"""
     return notes_db.get_all_notes()
 
+
 def get_subjects() -> List[str]:
-    """Get list of all available subjects from SQLite DB"""
+    """Get list of all available subjects"""
     all_notes = notes_db.get_all_notes()
     return list(set(note['subject'] for note in all_notes))
 
-def get_note_by_id(note_id: int) -> Optional[Dict]:
-    """Get a specific note by ID from SQLite DB"""
-    return notes_db.get_note_by_id(note_id)
 
 def increment_download_count(note_id: int) -> bool:
-    """Increment the download count for a note in SQLite DB"""
+    """Increment the download count for a note"""
     notes_db.increment_download(note_id)
     return True
 
+
 def get_top_contributors(limit: int = 10) -> List[Dict]:
-    """Get top note contributors based on upload count from SQLite DB"""
+    """Get top note contributors based on upload count"""
     all_notes = notes_db.get_all_notes()
     contributors = {}
     for note in all_notes:
@@ -70,8 +72,9 @@ def get_top_contributors(limit: int = 10) -> List[Dict]:
     contributor_list.sort(key=lambda x: x['uploads'], reverse=True)
     return contributor_list[:limit]
 
+
 def search_notes(query: str) -> List[Dict]:
-    """Search notes by subject, topic, or description from SQLite DB"""
+    """Search notes by subject, topic, or description"""
     query_lower = query.lower()
     results = []
     for note in notes_db.get_all_notes():
@@ -82,19 +85,6 @@ def search_notes(query: str) -> List[Dict]:
             results.append(note)
     return results
 
-def get_notes_by_semester(semester: str) -> List[Dict]:
-    """Get all notes for a specific semester from SQLite DB"""
-    results = []
-    for note in notes_db.get_all_notes():
-        if note['semester'] == semester:
-            results.append(note)
-    return results
-
-def get_recent_notes(limit: int = 10) -> List[Dict]:
-    """Get most recently uploaded notes"""
-    all_notes = notes_db.get_all_notes()
-    sorted_notes = sorted(all_notes, key=lambda x: x['upload_date'], reverse=True)
-    return sorted_notes[:limit]
 
 def get_popular_notes(limit: int = 10) -> List[Dict]:
     """Get most downloaded notes"""

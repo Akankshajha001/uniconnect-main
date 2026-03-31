@@ -20,8 +20,8 @@ from utils.helpers import get_date_difference
 CATEGORIES = ['ID Card', 'Bottle', 'Charger', 'Book', 'Umbrella', 'Keys', 
               'Phone', 'Wallet', 'Bag', 'Laptop', 'Headphones', 'Other']
 
-LOCATIONS = ['Central Library', 'New Market', 'Old Market', 'Surya Mandir', 
-             'CMS', 'Vidula Maidan', 'Ratan Mandir', 'Diwakar Mandir', 
+LOCATIONS = [' central Library', 'surya mandir', 'cms', 'ratan mandir', 
+             'vidula maidan', 'new market', 'apaji institute', 'old market', 
              'Hostel Area', 'Other']
 
 def render_lost_found():
@@ -193,7 +193,7 @@ def render_report_found():
             verification_data = {'phone': phone}
             
             add_found_item(category, category, location, description,
-                          reporter_name, reporter_contact, image_path, None, None, None,
+                          reporter_name, reporter_contact, image_path,
                           verification_data)
             update_user_activity(st.session_state.user['id'], 'item_reported')
             st.success("✅ Reported successfully!")
@@ -343,8 +343,6 @@ def render_item_card(item, context):
                 if st.session_state.get(f'show_contact_{context}_{item["id"]}', False):
                     matched_report = user_lost_reports[0]
                     st.success(f"✅ Verified — you reported a lost **{item['category']}** (Report #{matched_report['id']}, {matched_report['location']})")
-                    
-                    phone_line = f"📱 **{phone}**" if phone else ""
                     
                     contact_box = st.container(border=True)
                     with contact_box:
