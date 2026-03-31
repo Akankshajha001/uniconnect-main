@@ -138,32 +138,3 @@ def sanitize_filename(filename: str) -> str:
     
     return filename
 
-def calculate_match_percentage(item1: dict, item2: dict) -> float:
-    """
-    Calculate match percentage between two items
-    
-    Args:
-        item1: First item dictionary
-        item2: Second item dictionary
-    
-    Returns:
-        Match percentage (0-100)
-    """
-    score = 0
-    max_score = 3
-    
-    # Category match
-    if item1.get('category', '').lower() == item2.get('category', '').lower():
-        score += 1
-    
-    # Location match
-    if item1.get('location', '').lower() == item2.get('location', '').lower():
-        score += 1
-    
-    # Name similarity (simple check)
-    name1 = item1.get('item_name', '').lower()
-    name2 = item2.get('item_name', '').lower()
-    if name1 in name2 or name2 in name1:
-        score += 1
-    
-    return (score / max_score) * 100
