@@ -124,7 +124,7 @@ def get_notes_count_by_user(uploaded_by: str) -> int:
 
 
 # Counter for generating new IDs
-note_id_counter = 6
+
 
 def get_next_note_id() -> int:
     """Generate next unique ID for notes"""
