@@ -11,12 +11,11 @@ from services.notes_service import (
     increment_download_count,
     get_top_contributors,
     search_notes,
-    get_recent_notes,
     get_popular_notes
 )
 from database.users_db import update_user_activity
 from utils.helpers import format_date, format_number, truncate_text
-from utils.validators import validate_name, validate_file_name, validate_description
+from utils.validators import validate_name, validate_description
 
 # Semesters
 SEMESTERS = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 
@@ -292,7 +291,7 @@ def render_popular_notes():
             for j, col in enumerate(cols):
                 if i + j < len(popular):
                     with col:
-                        render_note_card(popular[i + j], show_popularity=True, context='popular')
+                        render_note_card(popular[i + j], context='popular')
 
 def render_search_notes():
     """Search notes"""
@@ -400,7 +399,7 @@ def render_contributor_podium(contributor, medal, color):
         </div>
     """, unsafe_allow_html=True)
 
-def render_note_card(note, show_popularity=False, context='default'):
+def render_note_card(note, context='default'):
     """Render a single note card"""
     date_text = format_date(note['upload_date'], 'display')
     downloads_text = format_number(note['downloads'])
