@@ -14,7 +14,7 @@ from services.notes_service import (
     get_recent_notes,
     get_popular_notes
 )
-
+from database.users_db import update_user_activity
 from utils.helpers import format_date, format_number, truncate_text
 from utils.validators import validate_name, validate_file_name, validate_description
 
