@@ -5,7 +5,7 @@ Industry-standard security with bcrypt password hashing
 """
 
 import sqlite3
-
+from typing import Dict, Optional
 import os
 
 # Try to use bcrypt (industry standard), fallback to hashlib if not available
