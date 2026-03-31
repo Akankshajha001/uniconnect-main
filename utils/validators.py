@@ -17,7 +17,8 @@ def validate_email(email: str) -> Tuple[bool, str]:
     Validate email format with strict real email validation
     Returns: (is_valid, error_message)
     """
-    
+    if not email:
+        return False, "Email cannot be empty"
     
     email = email.strip().lower()
     
