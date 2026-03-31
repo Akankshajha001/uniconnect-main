@@ -188,4 +188,5 @@ def main():
         # Default to dashboard
         render_dashboard()
 
-
+if __name__ == "__main__":
+    main()
