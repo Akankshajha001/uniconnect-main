@@ -17,7 +17,15 @@ def format_date(date_str: str, format_type: str = 'display') -> str:
         return date_str
 
 
-
+def get_date_difference(date_str: str) -> int:
+    """Get number of days between date and today"""
+    try:
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        now = datetime.now()
+        diff = now - date_obj
+        return diff.days
+    except:
+        return 0
 
 
 def truncate_text(text: str, max_length: int = 50, suffix: str = '...') -> str:
