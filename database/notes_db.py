@@ -5,12 +5,14 @@ Notes Exchange Database - SQLite persistent storage
 import sqlite3
 import os
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'notes.db')
 
+
 def _get_conn():
     return sqlite3.connect(DB_PATH)
+
 
 def _init_db():
     conn = _get_conn()
@@ -28,7 +30,6 @@ def _init_db():
         downloads INTEGER DEFAULT 0,
         rating REAL DEFAULT 0.0
     )''')
-    # Add file_path column if it doesn't exist
     try:
         c.execute('ALTER TABLE notes ADD COLUMN file_path TEXT')
     except sqlite3.OperationalError:
@@ -37,6 +38,10 @@ def _init_db():
     conn.close()
 
 _init_db()
+
+NOTE_KEYS = ['id', 'subject', 'topic', 'semester', 'uploaded_by', 'file_name', 
+             'file_path', 'description', 'upload_date', 'downloads', 'rating']
+
 
 def add_note(note: Dict) -> int:
     """Add a note to the database. Returns new note id."""
@@ -55,37 +60,26 @@ def add_note(note: Dict) -> int:
     conn.close()
     return note_id
 
+
 def get_all_notes() -> List[Dict]:
     """Get all notes from the database."""
     conn = _get_conn()
     c = conn.cursor()
-    c.execute('SELECT id, subject, topic, semester, uploaded_by, file_name, file_path, description, upload_date, downloads, rating FROM notes')
+    c.execute(f'SELECT {", ".join(NOTE_KEYS)} FROM notes')
     rows = c.fetchall()
     conn.close()
-    keys = ['id', 'subject', 'topic', 'semester', 'uploaded_by', 'file_name', 'file_path', 'description', 'upload_date', 'downloads', 'rating']
-    return [dict(zip(keys, row)) for row in rows]
+    return [dict(zip(NOTE_KEYS, row)) for row in rows]
+
 
 def get_notes_by_subject(subject: str) -> List[Dict]:
     """Get all notes for a given subject."""
     conn = _get_conn()
     c = conn.cursor()
-    c.execute('SELECT id, subject, topic, semester, uploaded_by, file_name, file_path, description, upload_date, downloads, rating FROM notes WHERE subject = ?', (subject,))
+    c.execute(f'SELECT {", ".join(NOTE_KEYS)} FROM notes WHERE subject = ?', (subject,))
     rows = c.fetchall()
     conn.close()
-    keys = ['id', 'subject', 'topic', 'semester', 'uploaded_by', 'file_name', 'file_path', 'description', 'upload_date', 'downloads', 'rating']
-    return [dict(zip(keys, row)) for row in rows]
+    return [dict(zip(NOTE_KEYS, row)) for row in rows]
 
-def get_note_by_id(note_id: int) -> Optional[Dict]:
-    """Get a single note by id."""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('SELECT id, subject, topic, semester, uploaded_by, file_name, file_path, description, upload_date, downloads, rating FROM notes WHERE id = ?', (note_id,))
-    row = c.fetchone()
-    conn.close()
-    if row:
-        keys = ['id', 'subject', 'topic', 'semester', 'uploaded_by', 'file_name', 'file_path', 'description', 'upload_date', 'downloads', 'rating']
-        return dict(zip(keys, row))
-    return None
 
 def increment_download(note_id: int):
     """Increment the download count for a note."""
@@ -94,42 +88,3 @@ def increment_download(note_id: int):
     c.execute('UPDATE notes SET downloads = downloads + 1 WHERE id = ?', (note_id,))
     conn.commit()
     conn.close()
-
-def update_rating(note_id: int, new_rating: float):
-    """Update the rating for a note."""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('UPDATE notes SET rating = ? WHERE id = ?', (new_rating, note_id))
-    conn.commit()
-    conn.close()
-
-def delete_note(note_id: int) -> bool:
-    """Delete a note from the database. Returns True if deleted, False if not found."""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('DELETE FROM notes WHERE id = ?', (note_id,))
-    deleted = c.rowcount > 0
-    conn.commit()
-    conn.close()
-    return deleted
-
-def get_notes_count_by_user(uploaded_by: str) -> int:
-    """Get the actual count of notes uploaded by a specific user."""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('SELECT COUNT(*) FROM notes WHERE uploaded_by = ?', (uploaded_by,))
-    count = c.fetchone()[0]
-    conn.close()
-    return count
-
-
-# Counter for generating new IDs
-note_id_counter = 6
-
-def get_next_note_id() -> int:
-    """Generate next unique ID for notes"""
-    global note_id_counter
-    current_id = note_id_counter
-    note_id_counter += 1
-    return current_id
-

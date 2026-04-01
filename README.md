@@ -1,452 +1,269 @@
-# 🎓 Uni-Connect
+# Uni-Connect
 
-## Lost & Found + Notes Exchange System
+## Campus Lost & Found + Notes Exchange Platform
 
-A comprehensive Streamlit-based campus utility platform that helps students report and recover lost items while facilitating academic notes sharing. Built using **in-memory Python data structures** (lists & dictionaries) without external databases.
-
----
-
-## 🎯 Project Goal
-
-To create a beginner-friendly, real-world campus management system that:
-- Helps students report lost items and find their belongings
-- Enables peer-to-peer academic notes sharing
-- Demonstrates clean software architecture
-- Uses only Python data structures (no external database)
-- Provides an attractive, modern user interface
+A Streamlit-based campus utility platform with SQLite persistent storage, bcrypt password hashing, and a direct-contact claim system for lost & found items.
 
 ---
 
-## ✨ Features
+## Features
 
-### 🔍 Lost & Found System
-- **Report Lost Items**: Submit details about items you've lost
-- **Report Found Items**: Help others by reporting items you've found
-- **Smart Matching**: Automatic matching based on category and location
-- **Search & Filter**: Find items by name, category, or location
-- **Claim System**: Verify and claim your lost items
-- **Real-time Updates**: Instant synchronization across the platform
+### Lost & Found System
+- **Report Lost Items** with category, location, description, ID card number, and optional photo upload
+- **Report Found Items** with phone number for direct contact by owner
+- **Category-based security gate** — owner must first file a lost report in the same category before they can see the finder's contact details. Prevents misuse by random users.
+- **Direct Contact flow** — owner contacts finder directly via phone/email, verifies ownership through real conversation
+- **Manual Claim by Finder** — after verifying the owner (in person/call), the finder marks the item as claimed on the app
+- **Big success popup** on claim with owner details
+- **Separate tabs**: Report Lost, Report Found, Lost Items, Found Items, Claimed
+- **Category filter** on Lost and Found item lists
+- **Optional image upload** for both lost and found items
 
-### 📚 Notes Exchange System
-- **Upload Notes**: Share your academic notes with peers
-- **Browse by Subject**: Organized by subjects and semesters
-- **Popular Notes**: Discover trending and most downloaded notes
-- **Search Functionality**: Find notes by subject, topic, or contributor
-- **Download Tracking**: Monitor how many times notes are downloaded
-- **Contributor Leaderboard**: Recognize top contributors with rankings
+### Notes Exchange System
+- **Upload notes** (PDF, DOC, DOCX, TXT) with subject, semester, and description
+- **Browse all notes** with subject filter and sorting (recent, most downloaded, subject name)
+- **Popular notes** tab showing most downloaded
+- **Search** by subject, topic, description, or uploader name
+- **Download tracking** with actual file download from server
+- **Top Contributors leaderboard** with podium for top 3
+- **File size validation** (max 10MB)
+- **Description validation** (min 10 characters)
 
-### 📊 Analytics Dashboard
-- **Visual Statistics**: Interactive charts using Plotly
-- **Category Distribution**: See what types of items are reported most
-- **Location Heatmap**: Identify common locations for lost items
-- **Subject-wise Stats**: Track notes uploads and downloads by subject
-- **User Activity**: Monitor platform engagement
+### User Management
+- **Signup** with name, roll number (7 digits), email, and password
+- **Login** via email or roll number
+- **Password security**: bcrypt hashing (industry standard), SHA256 fallback
+- **Password rules**: min 8 chars, uppercase, lowercase, digit, special character
+- **Email validation**: checks domain against known providers (Gmail, Yahoo, Outlook, educational domains)
+- **Session management** via Streamlit session state
+
+### Dashboard
+- Animated hero section with gradient background
+- Feature cards for Lost & Found and Notes Exchange
+- Quick action buttons when logged in (Report Lost, Report Found, Upload Notes, Browse Notes)
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
-campus_exchange_hub/
+Campus-Exchange-Hub/
+├── app.py                      # Main Streamlit entry point
+├── requirements.txt            # Python dependencies
+├── test_codes.py               # Database connectivity test script
 │
-├── app.py                          # Main Streamlit entry point
+├── database/                   # SQLite persistent storage
+│   ├── __init__.py
+│   ├── lost_found_db.py        # Lost & Found CRUD operations
+│   ├── notes_db.py             # Notes CRUD operations
+│   ├── users_db.py             # User auth & activity tracking
+│   ├── lost_found.db           # SQLite database (auto-created)
+│   ├── notes.db                # SQLite database (auto-created)
+│   └── users.db                # SQLite database (auto-created)
 │
-├── database/                       # In-memory data storage
-│   ├── __init__.py                # Database package initialization
-│   ├── lost_found_db.py           # Lost & Found data (list of dicts)
-│   ├── notes_db.py                # Notes data (dict of lists)
-│   └── users_db.py                # User session data
+├── services/                   # Business logic layer
+│   ├── __init__.py
+│   ├── lost_found_service.py   # Lost & Found operations
+│   └── notes_service.py        # Notes exchange operations
 │
-├── services/                       # Business logic layer
-│   ├── __init__.py                # Services package initialization
-│   ├── lost_found_service.py      # Lost & Found business logic
-│   ├── notes_service.py           # Notes exchange business logic
-│   └── analytics_service.py       # Statistics and analytics logic
+├── ui/                         # Streamlit user interface
+│   ├── __init__.py
+│   ├── dashboard_ui.py         # Welcome page
+│   ├── lost_found_ui.py        # Lost & Found interface
+│   └── notes_ui.py             # Notes exchange interface
 │
-├── ui/                            # User interface components
-│   ├── __init__.py               # UI package initialization
-│   ├── dashboard_ui.py           # Home page and analytics
-│   ├── lost_found_ui.py          # Lost & Found interface
-│   └── notes_ui.py               # Notes exchange interface
+├── utils/                      # Helper utilities
+│   ├── __init__.py
+│   ├── validators.py           # Email, password, name, description validation
+│   └── helpers.py              # Date formatting, text truncation, number formatting
 │
-├── utils/                         # Helper utilities
-│   ├── __init__.py               # Utils package initialization
-│   ├── validators.py             # Input validation functions
-│   └── helpers.py                # Common helper functions
-│
-├── myenvn/                        # Virtual environment
-│
-└── README.md                      # Project documentation (this file)
+├── uploaded_notes/             # Stored note files
+└── uploaded_images/            # Stored item photos (auto-created)
 ```
 
 ---
 
-## 🧠 Design Principles
+## Architecture
 
-### 1. **Separation of Concerns**
-- **Database Layer**: Pure data storage (no business logic)
-- **Service Layer**: Business logic (no UI code)
-- **UI Layer**: Presentation only (calls services)
-- **Utils Layer**: Reusable helper functions
-
-### 2. **In-Memory Data Structures**
-
-#### Lost & Found Database
-```python
-# List of dictionaries - Easy to iterate and filter
-lost_found_items = [
-    {
-        'id': 1,
-        'type': 'lost',  # or 'found'
-        'item_name': 'Black Water Bottle',
-        'category': 'Bottle',
-        'location': 'Library',
-        'description': '...',
-        'reporter_name': '...',
-        'reporter_contact': '...',
-        'date': '2026-01-08',
-        'status': 'open',  # or 'claimed'
-        'matched_with': None
-    },
-    # ... more items
-]
-```
-
-#### Notes Database
-```python
-# Dictionary of lists - Fast subject-wise access
-notes_data = {
-    'Data Structures': [
-        {
-            'id': 1,
-            'subject': 'Data Structures',
-            'topic': 'Arrays and Linked Lists',
-            'semester': 'Semester 3',
-            'uploaded_by': '...',
-            'file_name': '...',
-            'description': '...',
-            'upload_date': '2026-01-05',
-            'downloads': 45,
-            'rating': 4.5
-        },
-        # ... more notes
-    ],
-    'Database Management': [...],
-    # ... more subjects
-}
-```
-
-### 3. **No External Database**
-- All data stored in Python lists and dictionaries
-- Data persists only during runtime
-- Perfect for learning and demonstrations
-- Easy to understand and debug
-
-### 4. **Modern, Attractive UI**
-- Gradient backgrounds
-- Card-based layouts
-- Interactive charts with Plotly
-- Responsive design
-- Custom CSS styling
-- Smooth transitions and animations
-
----
-
-## 🚀 Installation & Setup
-
-### Prerequisites
-- Python 3.8 or higher
-- pip (Python package manager)
-
-### Step 1: Clone or Download the Project
-```bash
-cd "C:\Users\Gaurav Pathak\Desktop\campus exchange hub"
-```
-
-### Step 2: Activate Virtual Environment
-The virtual environment `myenvn` is already created. Activate it:
-
-**On Windows (PowerShell):**
-```powershell
-.\myenvn\Scripts\Activate.ps1
-```
-
-**On Windows (CMD):**
-```cmd
-myenvn\Scripts\activate.bat
-```
-
-### Step 3: Install Required Packages
-All packages are already installed, but if needed:
-```bash
-pip install streamlit plotly pandas
-```
-
-### Step 4: Run the Application
-```bash
-streamlit run app.py
-```
-
-The application will open in your default web browser at `http://localhost:8501`
-
----
-
-## 📖 How to Use
-
-### 1. **Login/Sign In**
-- Enter your name, roll number, and email in the sidebar
-- Click "Sign In" to access all features
-- No password required (simplified for demo)
-
-### 2. **Navigate the Platform**
-- Use sidebar buttons to switch between sections:
-  - 🏠 **Dashboard**: View statistics and analytics
-  - 🔍 **Lost & Found**: Report or search for items
-  - 📚 **Notes Exchange**: Upload or browse notes
-
-### 3. **Lost & Found Operations**
-
-#### Report a Lost Item:
-1. Go to Lost & Found section
-2. Click "Report Lost" tab
-3. Fill in item details (name, category, location, description)
-4. Submit the form
-5. System automatically checks for potential matches
-
-#### Report a Found Item:
-1. Go to Lost & Found section
-2. Click "Report Found" tab
-3. Fill in item details
-4. Submit the form
-5. Owner can claim it later
-
-#### Search Items:
-1. Use the "Search Items" tab
-2. Enter keywords (item name, category, or location)
-3. Browse results
-4. Claim items if you're the owner
-
-### 4. **Notes Exchange Operations**
-
-#### Upload Notes:
-1. Go to Notes Exchange section
-2. Click "Upload Notes" tab
-3. Enter subject, topic, semester, file name, and description
-4. Submit the form
-5. Your notes are now available to all students
-
-#### Browse Notes:
-1. Click "Browse All" tab
-2. Filter by subject or semester
-3. Sort by recency or popularity
-4. Click "Download" to get notes
-
-#### View Top Contributors:
-1. Click "Contributors" tab
-2. See leaderboard with top uploaders
-3. View contribution statistics
-
----
-
-## 🎨 UI Features
-
-### Attractive Design Elements
-- **Gradient Headers**: Eye-catching purple and pink gradients
-- **Card Layouts**: Clean, organized information display
-- **Interactive Charts**: Plotly visualizations for analytics
-- **Smooth Animations**: Hover effects and transitions
-- **Color-coded Status**: Visual indicators for item status
-- **Responsive Layout**: Works on different screen sizes
-
-### Color Scheme
-- Primary: Blue (#1E88E5)
-- Accent 1: Purple Gradient (#667eea to #764ba2)
-- Accent 2: Pink Gradient (#f093fb to #f5576c)
-- Success: Green (#28A745)
-- Warning: Orange (#FFA500)
-- Error: Red (#DC3545)
-
----
-
-## 🔧 Technical Details
-
-### Technology Stack
-- **Frontend/Backend**: Streamlit (Python web framework)
-- **Charts**: Plotly (interactive visualizations)
-- **Data Processing**: Pandas (optional, for advanced operations)
-- **Language**: Python 3.10.6
-
-### Data Flow
 ```
 User Action
-    ↓
-Streamlit UI (ui/*.py)
-    ↓
-Service Layer (services/*.py)
-    ↓
-Database Layer (database/*.py)
-    ↓
-In-Memory Data Structures (list/dict)
-    ↑
-Updated Data Returned
-    ↑
-UI Re-renders with New Data
+    │
+    ▼
+Streamlit UI (ui/*.py)          ← Presentation layer
+    │
+    ▼
+Service Layer (services/*.py)   ← Business logic
+    │
+    ▼
+Database Layer (database/*.py)  ← SQLite CRUD operations
+    │
+    ▼
+SQLite Files (.db)              ← Persistent storage
 ```
 
-### Key Functions
-
-#### Lost & Found Service
-- `add_lost_item()`: Add new lost item
-- `add_found_item()`: Add new found item
-- `find_potential_matches()`: Smart matching algorithm
-- `claim_item()`: Mark item as claimed
-- `search_items()`: Search functionality
-
-#### Notes Service
-- `upload_note()`: Add new note
-- `get_notes_by_subject()`: Filter by subject
-- `increment_download_count()`: Track downloads
-- `get_top_contributors()`: Leaderboard logic
-- `search_notes()`: Search functionality
-
-#### Analytics Service
-- `get_lost_found_stats()`: Lost & Found statistics
-- `get_notes_stats()`: Notes statistics
-- `get_category_distribution()`: Category breakdown
-- `get_subject_wise_stats()`: Subject analysis
+**Separation of concerns**: UI files never touch the database directly. Services handle all business logic. Database files handle only SQL operations.
 
 ---
 
-## 📚 Learning Outcomes
+## Lost & Found Claim Flow
 
-This project demonstrates:
-1. **Clean Architecture**: Separation of concerns with layers
-2. **Data Structures**: Practical use of lists and dictionaries
-3. **Web Development**: Building interactive web apps with Streamlit
-4. **User Interface Design**: Creating attractive, user-friendly interfaces
-5. **Business Logic**: Implementing real-world features
-6. **Data Validation**: Input sanitization and error handling
-7. **State Management**: Handling user sessions and app state
-8. **Visualization**: Creating charts and analytics dashboards
-
----
-
-## 🎓 Perfect for
-
-- **College Projects**: Demonstrates full-stack development
-- **Python Learning**: Practical application of Python concepts
-- **Portfolio**: Showcases your development skills
-- **Viva Presentations**: Easy to explain and demonstrate
-- **Campus Utility**: Actually useful for students
-
----
-
-## 🤔 Viva Questions & Answers
-
-### Q1: Why use in-memory data structures instead of a database?
-**A:** For learning purposes and simplicity. It demonstrates core programming concepts without database complexity. Perfect for understanding data structures and algorithms.
-
-### Q2: How does the matching algorithm work?
-**A:** It matches lost and found items based on category (exact match) and location (bonus points). Items with higher match scores appear first.
-
-### Q3: What happens when the app restarts?
-**A:** All data is lost since it's stored in memory. In production, we would use a database like SQLite, PostgreSQL, or MongoDB.
-
-### Q4: Can you scale this application?
-**A:** Yes! The layered architecture makes it easy to replace the in-memory database with a real database without changing service or UI code.
-
-### Q5: How is user authentication handled?
-**A:** Simplified login without passwords for demo purposes. In production, we'd implement proper authentication with hashed passwords and session tokens.
-
-### Q6: What are the main challenges you faced?
-**A:** 
-- Designing clean architecture with separation of concerns
-- Creating an attractive UI with Streamlit limitations
-- Implementing smart matching algorithms
-- Managing state across page refreshes
-
-### Q7: How would you improve this project?
-**A:**
-- Add real database (SQLite/PostgreSQL)
-- Implement actual file upload for notes
-- Add email notifications for matches
-- Include user authentication with passwords
-- Add admin panel for moderation
-- Implement image upload for lost items
-- Add chat/messaging between users
+```
+Owner reports lost item (Report Lost tab)
+    │
+    ▼
+Finder reports found item (Report Found tab, includes phone number)
+    │
+    ▼
+Owner browses Found Items tab
+    │
+    ▼
+System checks: does owner have a lost report in same category?
+    │
+    ├── NO  → Shows lock message: "Report your lost [Category] first"
+    │
+    └── YES → Shows "Contact Finder" button
+                │
+                ▼
+            Owner clicks → Sees finder's name, email, phone
+                │
+                ▼
+            Owner contacts finder directly (call/WhatsApp/email)
+                │
+                ▼
+            Finder verifies ownership through conversation
+                │
+                ▼
+            Finder clicks "Mark as Claimed" on the app
+                │
+                ▼
+            Success popup → Item moves to Claimed tab
+```
 
 ---
 
-## 🐛 Known Limitations
+## Installation & Setup
 
-1. **Data Persistence**: Data is lost when app restarts
-2. **File Upload**: Notes upload is simulated (no actual files)
-3. **Authentication**: Simplified login (no password)
-4. **Scalability**: In-memory storage limits scalability
-5. **Concurrency**: No multi-user concurrency handling
+### Prerequisites
+- Python 3.8+
+- pip
 
-These are intentional design choices for educational purposes.
-
----
-
-## 🚀 Future Enhancements
-
-- [ ] Add SQLite database for persistence
-- [ ] Implement real file upload and storage
-- [ ] Add email notifications
-- [ ] Include image upload for lost items
-- [ ] Add user ratings and reviews
-- [ ] Implement chat/messaging system
-- [ ] Add mobile responsive design
-- [ ] Include export functionality (PDF reports)
-- [ ] Add admin dashboard
-- [ ] Implement API for mobile apps
-
----
-
-## 📞 Support & Contact
-
-For questions or improvements:
-- **Developer**: Gaurav Pathak
-- **Project**: Uni-Connect
-- **Version**: 1.0.0
-- **Date**: January 2026
-
----
-
-## 📄 License
-
-This project is created for educational purposes. Feel free to use, modify, and distribute as needed for learning.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with **Streamlit** - Amazing Python web framework
-- Visualizations powered by **Plotly**
-- Inspired by real campus needs
-- Developed for student community
-
----
-
-## 🎉 Quick Start Commands
+### Setup
 
 ```bash
-# Activate environment
-.\myenvn\Scripts\Activate.ps1
+# Clone or navigate to the project
+cd Campus-Exchange-Hub
 
-# Run application
+# Create virtual environment (optional)
+python3 -m venv venv
+source venv/bin/activate        # macOS/Linux
+# or: venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
 streamlit run app.py
-
-# Install packages (if needed)
-pip install streamlit plotly pandas
-
-# Stop application
-# Press Ctrl+C in terminal
 ```
+
+The app opens at `http://localhost:8501` (or next available port).
+
+### Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| streamlit | Web framework |
+| bcrypt | Password hashing |
+| pillow | Image handling |
+
+SQLite is built into Python — no database server needed.
 
 ---
 
-**Made with ❤️ for students, by students**
+## How to Use
 
-**Happy Coding! 🚀**
+### 1. Sign Up & Login
+- Open sidebar → Sign Up tab
+- Enter name, 7-digit roll number, email, password
+- Login with email and password
+
+### 2. Report a Lost Item
+- Go to Lost & Found → Report Lost tab
+- Fill category, location, description
+- Optionally upload a photo
+- Submit
+
+### 3. Report a Found Item
+- Go to Lost & Found → Report Found tab
+- Fill category, location, description, **phone number**
+- Optionally upload a photo
+- Submit
+
+### 4. Claim Process
+- Owner goes to Found Items tab
+- If they have a matching lost report → "Contact Finder" button appears
+- Click to see finder's contact details
+- Contact finder directly to verify
+- Finder marks as claimed from their view
+
+### 5. Upload Notes
+- Go to Notes Exchange → Upload Notes tab
+- Fill subject, semester, name, description
+- Upload file (PDF/DOC/TXT, max 10MB)
+- Submit
+
+### 6. Download Notes
+- Browse All, Popular, or Search tabs
+- Click Download button on any note card
+
+---
+
+## Key Functions
+
+### Lost & Found Service
+| Function | Purpose |
+|----------|---------|
+| `add_lost_item()` | Report a lost item |
+| `add_found_item()` | Report a found item with verification data |
+| `get_lost_items()` | Get all lost items |
+| `get_found_items()` | Get all found items |
+| `claim_item()` | Mark item as claimed, auto-claims matching lost reports |
+
+### Notes Service
+| Function | Purpose |
+|----------|---------|
+| `upload_note()` | Upload a new note |
+| `get_notes_by_subject()` | Filter notes by subject |
+| `get_all_notes_list()` | Get all notes |
+| `get_popular_notes()` | Get most downloaded notes |
+| `search_notes()` | Search by subject/topic/description/uploader |
+| `get_top_contributors()` | Leaderboard by upload count |
+| `increment_download_count()` | Track downloads |
+
+### Validators
+| Function | Rules |
+|----------|-------|
+| `validate_email()` | Real domain check (Gmail, Yahoo, Outlook, .edu, .ac.in) |
+| `validate_roll_no()` | Exactly 7 digits |
+| `validate_password()` | 8+ chars, uppercase, lowercase, digit, special char |
+| `validate_name()` | 2-100 chars, letters/spaces/dots/hyphens only |
+| `validate_description()` | 10-500 characters |
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Frontend & Backend | Streamlit (Python) |
+| Database | SQLite3 (built-in) |
+| Password Security | bcrypt / SHA256 fallback |
+| File Storage | Local filesystem |
+| Language | Python 3 |
+
+---
+
+## Author
+
+- **Developer**: Gaurav Pathak
+- **Project**: Uni-Connect v2.0
+- **Date**: March 2026

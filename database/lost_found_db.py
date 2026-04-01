@@ -1,4 +1,3 @@
-
 """
 Lost & Found Database - SQLite persistent storage
 """
@@ -10,8 +9,10 @@ from typing import List, Dict, Optional
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'lost_found.db')
 
+
 def _get_conn():
     return sqlite3.connect(DB_PATH)
+
 
 def _init_db():
     conn = _get_conn()
@@ -36,7 +37,7 @@ def _init_db():
         verification_data TEXT,
         pending_claims TEXT
     )''')
-    # Add new columns if they don't exist (for existing databases)
+    # Keep column migration for existing databases
     new_columns = [
         ('secret_details', 'TEXT'),
         ('color', 'TEXT'),
@@ -48,11 +49,16 @@ def _init_db():
         try:
             c.execute(f'ALTER TABLE lost_found_items ADD COLUMN {col_name} {col_type}')
         except sqlite3.OperationalError:
-            pass  # Column already exists
+            pass
     conn.commit()
     conn.close()
 
 _init_db()
+
+ITEM_KEYS = ['id', 'type', 'item_name', 'category', 'location', 'description', 'reporter_name', 
+             'reporter_contact', 'date', 'status', 'matched_with', 'verification_code', 'image_path', 
+             'secret_details', 'color', 'brand', 'verification_data', 'pending_claims']
+
 
 def add_item(item: Dict) -> int:
     """Add a lost or found item to the database. Returns new item id."""
@@ -74,9 +80,6 @@ def add_item(item: Dict) -> int:
     conn.close()
     return item_id
 
-ITEM_KEYS = ['id', 'type', 'item_name', 'category', 'location', 'description', 'reporter_name', 
-             'reporter_contact', 'date', 'status', 'matched_with', 'verification_code', 'image_path', 
-             'secret_details', 'color', 'brand', 'verification_data', 'pending_claims']
 
 def get_all_items() -> List[Dict]:
     """Get all lost and found items from the database."""
@@ -86,6 +89,7 @@ def get_all_items() -> List[Dict]:
     rows = c.fetchall()
     conn.close()
     return [dict(zip(ITEM_KEYS, row)) for row in rows]
+
 
 def get_item_by_id(item_id: int) -> Optional[Dict]:
     """Get a single item by id."""
@@ -98,6 +102,7 @@ def get_item_by_id(item_id: int) -> Optional[Dict]:
         return dict(zip(ITEM_KEYS, row))
     return None
 
+
 def update_item_status(item_id: int, status: str, matched_with: Optional[int] = None):
     """Update the status and optionally matched_with for an item."""
     conn = _get_conn()
@@ -106,47 +111,5 @@ def update_item_status(item_id: int, status: str, matched_with: Optional[int] = 
         c.execute('UPDATE lost_found_items SET status = ?, matched_with = ? WHERE id = ?', (status, matched_with, item_id))
     else:
         c.execute('UPDATE lost_found_items SET status = ? WHERE id = ?', (status, item_id))
-    conn.commit()
-    conn.close()
-
-def delete_item(item_id: int):
-    """Delete an item from the database."""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('DELETE FROM lost_found_items WHERE id = ?', (item_id,))
-    conn.commit()
-    conn.close()
-
-def get_items_count() -> int:
-    """Get total count of items in database"""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('SELECT COUNT(*) FROM lost_found_items')
-    count = c.fetchone()[0]
-    conn.close()
-    return count
-
-def get_claimed_count() -> int:
-    """Get count of claimed items"""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM lost_found_items WHERE status = 'claimed'")
-    count = c.fetchone()[0]
-    conn.close()
-    return count
-
-def update_pending_claims(item_id: int, pending_claims: str):
-    """Update pending claims JSON for an item"""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('UPDATE lost_found_items SET pending_claims = ? WHERE id = ?', (pending_claims, item_id))
-    conn.commit()
-    conn.close()
-
-def update_verification_data(item_id: int, verification_data: str):
-    """Update verification data JSON for an item"""
-    conn = _get_conn()
-    c = conn.cursor()
-    c.execute('UPDATE lost_found_items SET verification_data = ? WHERE id = ?', (verification_data, item_id))
     conn.commit()
     conn.close()
