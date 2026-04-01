@@ -43,3 +43,21 @@ def format_number(num: int, suffix: str = '') -> str:
         return f"{num / 1000:.1f}K {suffix}".strip()
     else:
         return f"{num} {suffix}".strip()
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Sanitize filename by removing invalid characters
+    
+    Args:
+        filename: Original filename
+    
+    Returns:
+        Sanitized filename
+    """
+    # Remove or replace invalid characters
+    invalid_chars = '<>:"|?*'
+    for char in invalid_chars:
+        filename = filename.replace(char, '_')
+    
+    return filename
+
