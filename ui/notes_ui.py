@@ -121,7 +121,7 @@ def render_upload_notes():
             uploaded_file = st.file_uploader(
                 "Upload File *",
                 type=["pdf", "doc", "docx", "txt"],
-                help="Upload your notes file (PDF, DOC, DOCX, or TXT)",
+                help="Upload your notes file (PDF, DOC, DOCX, or TXT)(Max size: 10MB)",
                 key="notes_file_uploader"
             )
         
