@@ -47,7 +47,7 @@ A Streamlit-based campus utility platform with SQLite persistent storage, bcrypt
 ## Project Structure
 
 ```
-Campus-Exchange-Hub/
+uni-connect/
 ├── app.py                      # Main Streamlit entry point
 ├── requirements.txt            # Python dependencies
 ├── test_codes.py               # Database connectivity test script
