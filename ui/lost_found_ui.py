@@ -20,8 +20,8 @@ from utils.helpers import get_date_difference
 CATEGORIES = ['ID Card', 'Bottle', 'Charger', 'Book', 'Umbrella', 'Keys', 
               'Phone', 'Wallet', 'Bag', 'Laptop', 'Headphones', 'Other']
 
-LOCATIONS = ['Library', 'Cafeteria', 'Computer Lab', 'Main Building', 
-             'Sports Complex', 'Auditorium', 'Parking Area', 'Garden', 
+LOCATIONS = [' central Library', 'surya mandir', 'apaji institute', 'cms', 
+             'vidula maidan', 'new market', 'old market', 'Garden', 
              'Hostel Area', 'Other']
 
 def render_lost_found():
