@@ -28,14 +28,8 @@ def _init_db():
         reporter_contact TEXT,
         date TEXT,
         status TEXT,
-        matched_with INTEGER,
-        verification_code TEXT,
         image_path TEXT,
-        secret_details TEXT,
-        color TEXT,
-        brand TEXT,
-        verification_data TEXT,
-        pending_claims TEXT
+        verification_data TEXT
     )''')
     # Keep column migration for existing databases
     new_columns = [
@@ -56,8 +50,9 @@ def _init_db():
 _init_db()
 
 ITEM_KEYS = ['id', 'type', 'item_name', 'category', 'location', 'description', 'reporter_name', 
-             'reporter_contact', 'date', 'status', 'matched_with', 'verification_code', 'image_path', 
-             'secret_details', 'color', 'brand', 'verification_data', 'pending_claims']
+             'reporter_contact', 'date', 'status', 'image_path', 'verification_data']
+
+_SELECT_COLS = ', '.join(ITEM_KEYS)
 
 
 def add_item(item: Dict) -> int:
@@ -66,14 +61,11 @@ def add_item(item: Dict) -> int:
     c = conn.cursor()
     c.execute('''INSERT INTO lost_found_items (
         type, item_name, category, location, description, reporter_name, reporter_contact, 
-        date, status, matched_with, verification_code, image_path, secret_details, color, brand,
-        verification_data, pending_claims
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (
+        date, status, image_path, verification_data
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (
         item['type'], item['item_name'], item['category'], item['location'], item['description'],
         item['reporter_name'], item['reporter_contact'], item.get('date', datetime.now().strftime('%Y-%m-%d')),
-        item.get('status', 'open'), item.get('matched_with'), item.get('verification_code'), item.get('image_path'),
-        item.get('secret_details'), item.get('color'), item.get('brand'),
-        item.get('verification_data'), item.get('pending_claims')
+        item.get('status', 'open'), item.get('image_path'), item.get('verification_data')
     ))
     item_id = c.lastrowid
     conn.commit()
@@ -85,7 +77,7 @@ def get_all_items() -> List[Dict]:
     """Get all lost and found items from the database."""
     conn = _get_conn()
     c = conn.cursor()
-    c.execute('SELECT * FROM lost_found_items')
+    c.execute(f'SELECT {_SELECT_COLS} FROM lost_found_items')
     rows = c.fetchall()
     conn.close()
     return [dict(zip(ITEM_KEYS, row)) for row in rows]
@@ -95,7 +87,7 @@ def get_item_by_id(item_id: int) -> Optional[Dict]:
     """Get a single item by id."""
     conn = _get_conn()
     c = conn.cursor()
-    c.execute('SELECT * FROM lost_found_items WHERE id = ?', (item_id,))
+    c.execute(f'SELECT {_SELECT_COLS} FROM lost_found_items WHERE id = ?', (item_id,))
     row = c.fetchone()
     conn.close()
     if row:
@@ -103,13 +95,10 @@ def get_item_by_id(item_id: int) -> Optional[Dict]:
     return None
 
 
-def update_item_status(item_id: int, status: str, matched_with: Optional[int] = None):
-    """Update the status and optionally matched_with for an item."""
+def update_item_status(item_id: int, status: str):
+    """Update the status for an item."""
     conn = _get_conn()
     c = conn.cursor()
-    if matched_with is not None:
-        c.execute('UPDATE lost_found_items SET status = ?, matched_with = ? WHERE id = ?', (status, matched_with, item_id))
-    else:
-        c.execute('UPDATE lost_found_items SET status = ? WHERE id = ?', (status, item_id))
+    c.execute('UPDATE lost_found_items SET status = ? WHERE id = ?', (status, item_id))
     conn.commit()
     conn.close()
