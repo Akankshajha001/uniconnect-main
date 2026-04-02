@@ -20,8 +20,8 @@ from utils.helpers import get_date_difference
 CATEGORIES = ['ID Card', 'Bottle', 'Charger', 'Book', 'Umbrella', 'Keys', 
               'Phone', 'Wallet', 'Bag', 'Laptop', 'Headphones', 'Other']
 
-LOCATIONS = [' central Library', 'surya mandir', 'cms', 'ratan mandir', 
-             'vidula maidan', 'new market', 'apaji institute', 'old market', 
+LOCATIONS = ['Library', 'Cafeteria', 'Computer Lab', 'Main Building', 
+             'Sports Complex', 'Auditorium', 'Parking Area', 'Garden', 
              'Hostel Area', 'Other']
 
 def render_lost_found():
@@ -30,42 +30,33 @@ def render_lost_found():
     # Big Success Overlay Popup
     if st.session_state.get('show_claim_popup', False):
         popup_data = st.session_state.get('claim_popup_data', {})
+        category = popup_data.get('category', 'Item')
+        owner_name = popup_data.get('owner_name', '')
+        owner_contact = popup_data.get('owner_contact', '')
         
         st.balloons()
         
-        st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-                        padding: 3rem; border-radius: 30px; color: white; text-align: center;
-                        max-width: 600px; margin: 2rem auto;
-                        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                        border: 5px solid white;'>
+        col_pad1, col_popup, col_pad2 = st.columns([1, 3, 1])
+        with col_popup:
+            popup_box = st.container(border=True)
+            with popup_box:
+                st.markdown("<h1 style='text-align:center;'>🎉</h1>", unsafe_allow_html=True)
+                st.markdown("<h1 style='text-align:center; color:#28a745;'>ITEM CLAIMED!</h1>", unsafe_allow_html=True)
+                st.markdown(f"<p style='text-align:center; font-size:1.2rem;'><b>{category}</b> has been marked as claimed!</p>", unsafe_allow_html=True)
                 
-                <div style='font-size: 4rem; margin-bottom: 1rem;'>🎉</div>
-                <h1 style='margin: 0; font-size: 2.5rem;'>ITEM CLAIMED!</h1>
+                st.markdown("---")
+                st.markdown("<p style='text-align:center; color:#888;'>OWNER DETAILS</p>", unsafe_allow_html=True)
+                st.markdown(f"<h2 style='text-align:center;'>👤 {owner_name}</h2>", unsafe_allow_html=True)
+                st.markdown(f"<p style='text-align:center; font-size:1.2rem;'>📧 <b>{owner_contact}</b></p>", unsafe_allow_html=True)
+                st.markdown("---")
                 
-                <p style='font-size: 1.3rem; margin: 1rem 0;'>
-                    <b>{popup_data.get('category', 'Item')}</b> has been marked as claimed!
-                </p>
-                
-                <div style='background: rgba(255,255,255,0.25); padding: 2rem; border-radius: 20px; 
-                            margin: 2rem 0; border: 2px solid rgba(255,255,255,0.5);'>
-                    <p style='margin: 0 0 0.5rem 0; font-size: 1rem; opacity: 0.9;'>OWNER DETAILS</p>
-                    <div style='font-size: 3rem; margin: 0.5rem 0;'>👤</div>
-                    <h2 style='margin: 0; font-size: 2rem;'>{popup_data.get('owner_name', '')}</h2>
-                    <div style='background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 10px; margin-top: 1rem;'>
-                        <p style='margin: 0; font-size: 1.3rem;'>📧 <b>{popup_data.get('owner_contact', '')}</b></p>
-                    </div>
-                </div>
-                
-                <p style='font-size: 1.1rem;'>Item has been resolved successfully!</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.write("")
-        if st.button("✖  CLOSE & CONTINUE", key="close_popup", type="primary", use_container_width=True):
-            st.session_state['show_claim_popup'] = False
-            st.session_state['claim_popup_data'] = {}
-            st.rerun()
+                st.success("Item has been resolved successfully!")
+            
+            st.write("")
+            if st.button("✖  CLOSE & CONTINUE", key="close_popup", type="primary", use_container_width=True):
+                st.session_state['show_claim_popup'] = False
+                st.session_state['claim_popup_data'] = {}
+                st.rerun()
         st.stop()
     
     # Check login
@@ -311,7 +302,7 @@ def render_item_card(item, context):
                     
                     if st.form_submit_button("✅ Approve & Mark as Claimed", type="primary", use_container_width=True):
                         if name and contact:
-                            claim_item(item['id'], name, f"Verified by finder: {notes}", contact, contact)
+                            claim_item(item['id'], claimer_email=contact, claimer_contact=contact)
                             st.session_state['show_claim_popup'] = True
                             st.session_state['claim_popup_data'] = {
                                 'category': item['category'],

@@ -2,7 +2,7 @@
 Uni-Connect - Main Application Entry Point
 A Streamlit-based platform for Lost & Found and Notes Exchange
 
-
+Author: Gaurav Pathak
 Description: Campus utility platform using in-memory Python data structures
 """
 

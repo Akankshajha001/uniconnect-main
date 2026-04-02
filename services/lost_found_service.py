@@ -65,8 +65,7 @@ def get_found_items() -> List[Dict]:
     return [item for item in db_get_all_items() if item['type'] == 'found']
 
 
-def claim_item(item_id: int, claimer_name: str, verification_detail: str = "", 
-               claimer_email: str = "", claimer_contact: str = "") -> bool:
+def claim_item(item_id: int, claimer_email: str = "", claimer_contact: str = "") -> bool:
     item = db_get_item_by_id(item_id)
     if not item:
         return False
