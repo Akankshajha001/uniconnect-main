@@ -47,7 +47,7 @@ A Streamlit-based campus utility platform with SQLite persistent storage, bcrypt
 ## Project Structure
 
 ```
-Campus-Exchange-Hub/
+uni-connect/
 ├── app.py                      # Main Streamlit entry point
 ├── requirements.txt            # Python dependencies
 ├── test_codes.py               # Database connectivity test script
@@ -151,7 +151,7 @@ System checks: does owner have a lost report in same category?
 
 ```bash
 # Clone or navigate to the project
-cd Campus-Exchange-Hub
+cd uni-connect
 
 # Create virtual environment (optional)
 python3 -m venv venv
@@ -264,6 +264,6 @@ SQLite is built into Python — no database server needed.
 
 ## Author
 
-- **Developer**: Gaurav Pathak
+- **Developer**: group 11-akanksha,kamya,rashi,yashita
 - **Project**: Uni-Connect v2.0
 - **Date**: March 2026
