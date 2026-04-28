@@ -367,11 +367,11 @@ def render_contributors():
                     medal = f"#{rank}"
                 
                 st.markdown(f"""
-                    <div style='background: #f8f9fa; padding: 1rem; border-radius: 10px; 
-                                margin-bottom: 0.5rem; border-left: 4px solid #667eea;'>
+                    <div style='background: #1e1e1e; padding: 1rem; border-radius: 10px; 
+                                margin-bottom: 0.5rem; border-left: 4px solid #667eea; color: white;'>
                         <span style='font-size: 1.2rem; font-weight: bold;'>{medal}</span>
-                        <strong style='margin-left: 1rem;'>{contributor['name']}</strong>
-                        <span style='float: right; color: #666;'>
+                        <strong style='margin-left: 1rem; color: white;'>{contributor['name']}</strong>
+                        <span style='float: right; color: #ccc;'>
                             📤 {contributor['uploads']} uploads | 
                             📥 {contributor['total_downloads']} downloads | 
                             📚 {len(contributor['subjects'])} subjects
@@ -386,8 +386,8 @@ def render_contributor_podium(contributor, medal, color):
                     padding: 1.5rem; border-radius: 15px; text-align: center;
                     border: 3px solid {color}; box-shadow: 0 5px 20px rgba(0,0,0,0.2);'>
             <div style='font-size: 3rem;'>{medal}</div>
-            <h3 style='margin: 0.5rem 0; color: #333;'>{contributor['name']}</h3>
-            <p style='margin: 0.5rem 0; color: #666; font-size: 1.1rem;'>
+            <h3 style='margin: 0.5rem 0; color: white;'>{contributor['name']}</h3>
+            <p style='margin: 0.5rem 0; color: rgba(255,255,255,0.85); font-size: 1.1rem;'>
                 <strong>{contributor['uploads']}</strong> uploads
             </p>
             <p style='margin: 0; color: #666;'>
