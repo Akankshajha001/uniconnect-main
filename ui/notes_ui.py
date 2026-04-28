@@ -153,7 +153,7 @@ def render_upload_notes():
                 topic = file_name.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ')
                 
                 # Validate file size (max 10MB)
-                if file_size > 10 * 1024 * 1024:
+                if file_size > 200 * 1024 * 1024:
                     st.error("❌ File size too large. Maximum 10MB allowed.")
                     return
                 
