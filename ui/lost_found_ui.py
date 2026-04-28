@@ -365,7 +365,7 @@ def _render_card_html(item, border, badge, days):
         <div style='border-left: 5px solid {border}; padding: 1rem; 
                     background: #f8f9fa; border-radius: 10px; margin-bottom: 0.5rem;'>
             <div style='display: flex; justify-content: space-between;'>
-                <h4 style='margin: 0;'>{item['category']}</h4>
+                <h4 style='margin: 0; color: {border} ;'>{item['category']}</h4>
                 <span style='background: {border}; color: white; padding: 3px 10px; 
                             border-radius: 15px; font-size: 0.8rem;'>{badge}</span>
             </div>
