@@ -14,12 +14,59 @@ from utils.validators import validate_name, validate_email, validate_roll_no, va
 
 
 def load_custom_css():
-    """Inject custom CSS for the app (placeholder)."""
+    """Inject custom CSS for the app."""
     st.markdown("""
-        <style>
-        /* Example: Make sidebar background dark */
-        .css-1d391kg { background: #222 !important; }
-        </style>
+    <style>
+
+    /* Sidebar */
+    section[data-testid="stSidebar"]{
+        background:#F3EEFF;
+    }
+
+    /* Sidebar text */
+    section[data-testid="stSidebar"] *{
+        color:#4C1D95;
+    }
+
+    /* Input fields */
+    .stTextInput input{
+        background:white;
+        border:2px solid #D8B4FE;
+        border-radius:10px;
+    }
+
+    /* Buttons */
+    .stButton>button,
+    div[data-testid="stForm"] button{
+        background:linear-gradient(135deg,#7C3AED,#9333EA);
+        color:white !important;
+        border:none;
+        border-radius:10px;
+        font-weight:600;
+    }
+
+    .stButton>button:hover,
+    div[data-testid="stForm"] button:hover{
+        background:#6D28D9;
+        color:white !important;
+    }
+
+    /* Login / Signup Tabs */
+    button[data-baseweb="tab"]{
+        color:#6D28D9 !important;
+        font-weight:600;
+    }
+
+    button[data-baseweb="tab"][aria-selected="true"]{
+        color:#7C3AED !important;
+        border-bottom:3px solid #7C3AED !important;
+    }
+
+    button[data-baseweb="tab"]:hover{
+        color:#9333EA !important;
+    }
+
+    </style>
     """, unsafe_allow_html=True)
 
 def render_sidebar():
@@ -27,12 +74,12 @@ def render_sidebar():
     with st.sidebar:
         # Logo and Title
         st.markdown("""
-            <div style='text-align: center; padding: 1rem 0; color: white;'>
+            <div style='text-align: center; padding: 1rem 0; color:#4C1D95;'>
                 <h1 style='font-size: 2.5rem; margin: 0;'>🎓</h1>
                 <h2 style='margin: 0.5rem 0; font-size: 1.5rem;'>Uni-Connect</h2>
                 <p style='margin: 0; opacity: 0.8; font-size: 0.9rem;'>Connect • Share • Succeed</p>
             </div>
-            <hr style='border: 1px solid rgba(255,255,255,0.3); margin: 1rem 0;'>
+            <hr style='border:1px solid #D8B4FE; margin:1rem 0;'>
         """, unsafe_allow_html=True)
 
         # User session state
@@ -42,7 +89,7 @@ def render_sidebar():
         if st.session_state.user is None:
             tabs = st.tabs(["Login", "Sign Up"])
             with tabs[0]:
-                st.markdown("<h3 style='color: white;'>👤 Login</h3>", unsafe_allow_html=True)
+                st.markdown("<h3 style='color:#5B21B6;'>👤 Login</h3>", unsafe_allow_html=True)
                 with st.form("sidebar_login_form"):
                     email = st.text_input("Email", placeholder="your.email@example.com")
                     password = st.text_input("Password", type="password", placeholder="Enter your password")
@@ -60,7 +107,7 @@ def render_sidebar():
                             else:
                                 st.error("Invalid email or password.")
             with tabs[1]:
-                st.markdown("<h3 style='color: white;'>📝 Sign Up</h3>", unsafe_allow_html=True)
+                st.markdown("<h3 style='color:#5B21B6;'>📝 Sign Up</h3>", unsafe_allow_html=True)
                 with st.form("sidebar_signup_form"):
                     name = st.text_input("Name", placeholder="Enter your name")
                     roll_no = st.text_input("Roll Number", placeholder="e.g., 2311700")
@@ -89,8 +136,8 @@ def render_sidebar():
         else:
             user = st.session_state.user
             st.markdown(f"""
-                <div style='background: rgba(255,255,255,0.1); padding: 1rem; 
-                            border-radius: 10px; color: white; margin-bottom: 1rem;'>
+                <div style='background:#EDE9FE; padding: 1rem; 
+                            border-radius: 10px; color:#4C1D95; margin-bottom: 1rem;'>
                     <h3 style='margin: 0; font-size: 1.2rem;'>👤 {user['name']}</h3>
                     <p style='margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem;'>
                         Email: {user['email']}<br>
@@ -107,7 +154,7 @@ def render_sidebar():
 
         # Navigation
         st.markdown("""
-            <div style='color: white; padding: 0.5rem 0;'>
+            <div style='color:#4C1D95;padding:0.5rem 0;'>
                 <h3 style='margin: 0; font-size: 1.2rem;'>📍 Navigation</h3>
             </div>
         """, unsafe_allow_html=True)
@@ -155,7 +202,7 @@ def render_sidebar():
         
         # Footer
         st.markdown("""
-            <div style='text-align: center; color: white; opacity: 0.6; 
+            <div style='text-align: center; color: #4C1D95; opacity: 0.6; 
                         font-size: 0.8rem; padding: 1rem 0;'>
                 <p style='margin: 0;'>Uni-Connect v2.0</p>
                 <p style='margin: 0;'>Made with ❤️ using Streamlit</p>
