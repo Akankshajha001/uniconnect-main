@@ -5,7 +5,6 @@ A Streamlit-based platform for Lost & Found and Notes Exchange
 
 Description: Campus utility platform using in-memory Python data structures
 """
-
 import streamlit as st
 from database.users_db import signup_user, login_user
 from ui.dashboard_ui import render_dashboard
