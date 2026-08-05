@@ -137,7 +137,6 @@ def render_dashboard():
                 </div>
             </div>
         """, unsafe_allow_html=True)
-    
     with col2:
         st.markdown("""
             <div class="feature-card">
@@ -152,7 +151,13 @@ def render_dashboard():
         """, unsafe_allow_html=True)
     
     st.markdown("<br><br>", unsafe_allow_html=True)
-    
+    if st.session_state.get("user") is None:
+      if st.button(
+        "🔑 Login / Sign Up",
+        key="login_sidebar_btn",
+        use_container_width=True
+      ):
+        st.info("👈 Please use the Login / Sign Up section in the left sidebar to continue.")
     # Benefits Section
     st.markdown("""
         <div class="benefits-section">
@@ -189,6 +194,14 @@ def render_dashboard():
     """, unsafe_allow_html=True)
     
     st.markdown("<br>", unsafe_allow_html=True)
+
+    if st.session_state.get("user") is None:
+          if st.button(
+            "🔑 Login / Sign Up",
+            key="lost_auth_button",
+            use_container_width=True
+        ):
+            st.info("👈 Please use the Login / Sign Up section in the left sidebar to continue.")
     
     # Call to Action
     is_logged_in = 'user' in st.session_state and st.session_state.user is not None
@@ -221,6 +234,13 @@ def render_dashboard():
         """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
+        if st.session_state.get("user") is None:
+          if st.button(
+            "🔑 Login / Sign Up",
+            key="notes_auth_button",
+            use_container_width=True
+           ):
+            st.info("👈 Please use the Login / Sign Up section in the left sidebar to continue.")
         
         # Quick Action Buttons
         col1, col2, col3, col4 = st.columns(4)

@@ -26,7 +26,7 @@ def _init_db():
     c = conn.cursor()
     
     try:
-        c.execute("SELECT id, name, roll_no, email, password_hash FROM users LIMIT 1")
+        c.execute("SELECT id, name, email, password_hash FROM users LIMIT 1")
     except sqlite3.OperationalError:
         c.execute("DROP TABLE IF EXISTS user_activity")
         c.execute("DROP TABLE IF EXISTS users")
@@ -34,7 +34,6 @@ def _init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        roll_no TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -83,13 +82,15 @@ def verify_password(password: str, hashed: str) -> bool:
         return hashlib.sha256(password.encode('utf-8')).hexdigest() == hashed
 
 
-def signup_user(name: str, roll_no: str, email: str, password: str) -> bool:
-    """Register a new user. Returns True if successful, False if user/email/roll exists."""
+def signup_user(name: str, email: str, password: str) -> bool:
+    """Register a new user. Returns True if successful, False if user/email exists."""
+    email = email.strip().lower()
+
     conn = _get_conn()
     c = conn.cursor()
     try:
         c.execute('''INSERT INTO users (name, roll_no, email, password_hash) VALUES (?, ?, ?, ?)''',
-                  (name, roll_no, email, hash_password(password)))
+                  (name, email, hash_password(password)))
         user_id = c.lastrowid
         c.execute('''INSERT INTO user_activity (user_id) VALUES (?)''', (user_id,))
         conn.commit()
@@ -100,18 +101,24 @@ def signup_user(name: str, roll_no: str, email: str, password: str) -> bool:
         conn.close()
 
 
-def login_user(email_or_roll: str, password: str) -> Optional[Dict]:
-    """Authenticate user by email or roll_no and password. Returns user dict if valid, else None."""
+def login_user(email: str, password: str) -> Optional[Dict]:
+    """Authenticate user by email and password. Returns user dict if valid, else None."""
+    email = email.strip()
+
+    if "@" in email:
+      email = email.lower()
+
     conn = _get_conn()
     c = conn.cursor()
-    c.execute('''SELECT id, name, roll_no, email, password_hash FROM users WHERE email = ? OR roll_no = ?''',
-              (email_or_roll, email_or_roll))
+    
+    c.execute('''SELECT id, name,email, password_hash FROM users WHERE email = ? OR roll_no = ?''',
+              (email, email))
     row = c.fetchone()
     if row and verify_password(password, row[4]):
         c.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (row[0],))
         conn.commit()
         conn.close()
-        return {'id': row[0], 'name': row[1], 'roll_no': row[2], 'email': row[3]}
+        return {'id': row[0], 'name': row[1], 'email': row[3]}
     conn.close()
     return None
 

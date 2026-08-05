@@ -18,10 +18,11 @@ def validate_email(email: str) -> Tuple[bool, str]:
         return False, "Email cannot be empty"
 
     email = email.strip().lower()
-
+    print("Checking email:", email)
     pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
     if not re.match(pattern, email):
-        return False, "Invalid email format"
+        return False, "Invalid email -checkformat"
 
     if '..' in email:
         return False, "Email cannot contain consecutive dots"
