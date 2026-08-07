@@ -169,6 +169,16 @@ def render_dashboard():
                 </div>
             </div>
         """, unsafe_allow_html=True)
+            # Login reminder for visitors
+    if 'user' not in st.session_state or st.session_state.user is None:
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "🔐 Login from Sidebar to Continue",
+            use_container_width=True,
+            type="primary"
+        ):
+            st.info("👈 Please login or sign up using the sidebar.")
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     

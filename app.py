@@ -11,7 +11,7 @@ from database.users_db import signup_user, login_user, get_user_by_id
 from ui.dashboard_ui import render_dashboard
 from ui.lost_found_ui import render_lost_found
 from ui.notes_ui import render_notes_exchange
-from utils.validators import validate_name, validate_email, validate_roll_no, validate_password
+from utils.validators import validate_name, validate_email, validate_password
 
 
 def load_custom_css():
@@ -64,29 +64,25 @@ def render_sidebar():
                 st.markdown("<h3 style='color: white;'>📝 Sign Up</h3>", unsafe_allow_html=True)
                 with st.form("sidebar_signup_form"):
                     name = st.text_input("Name", placeholder="Enter your name")
-                    roll_no = st.text_input("Roll Number", placeholder="e.g., 2021-CS-001")
                     email = st.text_input("Email", placeholder="your.email@example.com")
                     password = st.text_input("Password", type="password", placeholder="Create a password")
                     signup_btn = st.form_submit_button("📝 Sign Up", use_container_width=True)
                     if signup_btn:
                         name_valid, name_error = validate_name(name)
-                        roll_valid, roll_error = validate_roll_no(roll_no)
                         email_valid, email_error = validate_email(email)
                         password_valid, password_error = validate_password(password)
                         if not name_valid:
                             st.error(name_error)
-                        elif not roll_valid:
-                            st.error(roll_error)
                         elif not email_valid:
                             st.error(email_error)
                         elif not password_valid:
                             st.error(password_error)
                         else:
-                            success = signup_user(name, roll_no, email, password)
+                            success = signup_user(name, f"legacy_{email}", email, password)
                             if success:
                                 st.success("Signup successful! Please login.")
                             else:
-                                st.error("Email or roll number already exists.")
+                                st.error("Email already exists.")
         else:
             user = st.session_state.user
             st.markdown(f"""
@@ -95,7 +91,7 @@ def render_sidebar():
                     <h3 style='margin: 0; font-size: 1.2rem;'>👤 {user['name']}</h3>
                     <p style='margin: 0.5rem 0 0 0; opacity: 0.8; font-size: 0.9rem;'>
                         Email: {user['email']}<br>
-                        Roll: {user['roll_no']}
+                    
                     </p>
                 </div>
             """, unsafe_allow_html=True)
