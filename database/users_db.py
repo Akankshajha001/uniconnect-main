@@ -133,7 +133,6 @@ def login_user(email: str, password: str) -> Optional[Dict]:
     conn.close()
     return None
 
-
 def update_user_activity(user_id: int, activity_type: str):
     """Update user activity count in DB. Only tracks notes_downloaded cumulatively."""
     if not user_id or not isinstance(user_id, (int, float)):
