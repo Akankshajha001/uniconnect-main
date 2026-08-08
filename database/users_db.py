@@ -99,29 +99,39 @@ def signup_user(name: str, email: str, password: str) -> bool:
         return False
     finally:
         conn.close()
-
-
 def login_user(email: str, password: str) -> Optional[Dict]:
     """Authenticate user by email and password. Returns user dict if valid, else None."""
-    email = email.strip()
-
-    if "@" in email:
-      email = email.lower()
+    email = email.strip().lower()
 
     conn = _get_conn()
     c = conn.cursor()
-    
-    c.execute('''SELECT id, name,email, password_hash FROM users WHERE email = ? OR roll_no = ?''',
-              (email, email))
+
+    c.execute(
+        '''SELECT id, name, email, password_hash
+           FROM users
+           WHERE LOWER(email) = LOWER(?)''',
+        (email,)
+    )
+
     row = c.fetchone()
-    if row and verify_password(password, row[4]):
-        c.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (row[0],))
+
+    if row and verify_password(password, row[3]):
+        c.execute(
+            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+            (row[0],)
+        )
+
         conn.commit()
         conn.close()
-        return {'id': row[0], 'name': row[1], 'email': row[3]}
+
+        return {
+            'id': row[0],
+            'name': row[1],
+            'email': row[2]
+        }
+
     conn.close()
     return None
-
 
 def update_user_activity(user_id: int, activity_type: str):
     """Update user activity count in DB. Only tracks notes_downloaded cumulatively."""
