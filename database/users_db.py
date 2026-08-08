@@ -17,7 +17,18 @@ except ImportError:
     USE_BCRYPT = False
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'users.db')
+def normalize_email(email: str) -> str:
+    """
+    Normalize Gmail addresses so the part before @gmail.com
+    is case-insensitive.
+    """
+    email = email.strip()
 
+    if '@gmail.com' in email.lower():
+        local_part, domain = email.rsplit('@', 1)
+        return f"{local_part.lower()}@gmail.com"
+
+    return email.lower()
 def _get_conn():
     return sqlite3.connect(DB_PATH)
 
@@ -83,35 +94,81 @@ def verify_password(password: str, hashed: str) -> bool:
         import hashlib
         return hashlib.sha256(password.encode('utf-8')).hexdigest() == hashed
 
-def signup_user(name: str, roll_no: str, email: str, password: str) -> bool:
-    """Register a new user. Returns True if successful, False if user/email/roll exists."""
+def signup_user(name: str, email: str, password: str) -> bool:
+    """Register a new user using name, email and password."""
     conn = _get_conn()
     c = conn.cursor()
+
+    email = normalize_email(email)
+
     try:
-        c.execute('''INSERT INTO users (name, roll_no, email, password_hash) VALUES (?, ?, ?, ?)''',
-                  (name, roll_no, email, hash_password(password)))
+        # Prevent duplicate Gmail accounts regardless of capitalization
+        c.execute(
+            'SELECT id FROM users WHERE LOWER(email) = LOWER(?)',
+            (email,)
+        )
+
+        if c.fetchone():
+            return False
+
+        # Keep legacy roll_no column empty internally.
+        # The application no longer asks users for a roll number.
+        c.execute(
+            '''INSERT INTO users
+               (name, roll_no, email, password_hash)
+               VALUES (?, ?, ?, ?)''',
+            (name, f"legacy_{email}", email, hash_password(password))
+        )
+
         user_id = c.lastrowid
-        c.execute('''INSERT INTO user_activity (user_id) VALUES (?)''', (user_id,))
+
+        c.execute(
+            '''INSERT INTO user_activity (user_id)
+               VALUES (?)''',
+            (user_id,)
+        )
+
         conn.commit()
         return True
+
     except sqlite3.IntegrityError:
+        conn.rollback()
         return False
+
     finally:
         conn.close()
 
-def login_user(email_or_roll: str, password: str) -> Optional[Dict]:
-    """Authenticate user by email or roll_no and password. Returns user dict if valid, else None."""
+def login_user(email: str, password: str) -> Optional[Dict]:
+    """Authenticate user using email and password."""
     conn = _get_conn()
     c = conn.cursor()
-    c.execute('''SELECT id, name, roll_no, email, password_hash FROM users WHERE email = ? OR roll_no = ?''',
-              (email_or_roll, email_or_roll))
+
+    email = normalize_email(email)
+
+    c.execute(
+        '''SELECT id, name, email, password_hash
+           FROM users
+           WHERE LOWER(email) = LOWER(?)''',
+        (email,)
+    )
+
     row = c.fetchone()
-    if row and verify_password(password, row[4]):
-        # Update last login time
-        c.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (row[0],))
+
+    if row and verify_password(password, row[3]):
+        c.execute(
+            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+            (row[0],)
+        )
+
         conn.commit()
         conn.close()
-        return {'id': row[0], 'name': row[1], 'roll_no': row[2], 'email': row[3]}
+
+        return {
+            'id': row[0],
+            'name': row[1],
+            'email': row[2]
+        }
+
     conn.close()
     return None
 
